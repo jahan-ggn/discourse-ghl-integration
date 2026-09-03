@@ -16,3 +16,7 @@ plugins:
     default: ""
     client: false
     textarea: true
+  
+  ghl_community_member_tag:
+    default: "community_member"
+    client: false

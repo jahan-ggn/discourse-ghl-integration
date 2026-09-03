@@ -4,3 +4,4 @@ en:
     ghl_client_id: "GoHighLevel OAuth client ID"
     ghl_client_secret: "GoHighLevel OAuth client secret"
     ghl_tag_group_mappings: "GHL tag to Discourse group mappings, one per line using tag:group"
+    ghl_community_member_tag: "GHL tag assigned to free Discourse community members"

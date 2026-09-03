@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 DiscourseGhlIntegration::Engine.routes.draw do
-  get "/examples" => "examples#index"
-  # define routes here
+  get "/oauth/callback" => "oauth#callback"
+
+  post "/webhooks" => "webhooks#create"
 end
 
-Discourse::Application.routes.draw { mount ::DiscourseGhlIntegration::Engine, at: "discourse-ghl-integration" }
+Discourse::Application.routes.draw { mount ::DiscourseGhlIntegration::Engine, at: "/crm" }
