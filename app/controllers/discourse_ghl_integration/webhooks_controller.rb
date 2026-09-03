@@ -14,9 +14,7 @@ module ::DiscourseGhlIntegration
 
       head :ok
     rescue Oauth::Error => e
-      Rails.logger.warn(
-        "[#{PLUGIN_NAME}] GoHighLevel webhook failed: #{e.message}",
-      )
+      Rails.logger.warn("[#{PLUGIN_NAME}] GoHighLevel webhook failed: #{e.message}")
 
       head :unprocessable_entity
     end
@@ -29,12 +27,7 @@ module ::DiscourseGhlIntegration
 
       return if company_id.blank? || location_id.blank?
 
-      OauthStore.save_pending_install(
-        {
-          "company_id" => company_id,
-          "location_id" => location_id,
-        },
-      )
+      OauthStore.save_pending_install({ "company_id" => company_id, "location_id" => location_id })
 
       Oauth.complete_pending_connection!
     end

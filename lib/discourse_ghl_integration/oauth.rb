@@ -7,8 +7,7 @@ require "uri"
 module ::DiscourseGhlIntegration
   class Oauth
     TOKEN_URL = "https://services.leadconnectorhq.com/oauth/token"
-    LOCATION_TOKEN_URL =
-      "https://services.leadconnectorhq.com/oauth/location-token"
+    LOCATION_TOKEN_URL = "https://services.leadconnectorhq.com/oauth/location-token"
 
     API_VERSION = "v3"
     EXPIRY_BUFFER = 5.minutes.to_i
@@ -71,10 +70,7 @@ module ::DiscourseGhlIntegration
         response =
           post_form(
             LOCATION_TOKEN_URL,
-            {
-              companyId: company_id,
-              locationId: location_id,
-            },
+            { companyId: company_id, locationId: location_id },
             bearer_token: company_token,
           )
 
@@ -100,8 +96,7 @@ module ::DiscourseGhlIntegration
         if company["expires_at"].to_i <= Time.now.to_i
           OauthStore.clear_pending_company
 
-          raise Error,
-                "GoHighLevel Company token expired before Location authorization completed"
+          raise Error, "GoHighLevel Company token expired before Location authorization completed"
         end
 
         token =
@@ -142,9 +137,7 @@ module ::DiscourseGhlIntegration
 
         refresh_token = credentials["refresh_token"]
 
-        if refresh_token.blank?
-          raise Error, "No GoHighLevel refresh token is available"
-        end
+        raise Error, "No GoHighLevel refresh token is available" if refresh_token.blank?
 
         response =
           post_form(
@@ -161,8 +154,7 @@ module ::DiscourseGhlIntegration
         token = parse_token_response(response)
 
         unless token["userType"] == "Location"
-          raise Error,
-                "Expected a Location token while refreshing GoHighLevel OAuth"
+          raise Error, "Expected a Location token while refreshing GoHighLevel OAuth"
         end
 
         save_location_token(token)
@@ -184,18 +176,12 @@ module ::DiscourseGhlIntegration
         request["Content-Type"] = "application/x-www-form-urlencoded"
         request["Version"] = API_VERSION
 
-        if bearer_token.present?
-          request["Authorization"] = "Bearer #{bearer_token}"
-        end
+        request["Authorization"] = "Bearer #{bearer_token}" if bearer_token.present?
 
         request.body = URI.encode_www_form(body)
 
         response =
-          Net::HTTP.start(
-            uri.hostname,
-            uri.port,
-            use_ssl: uri.scheme == "https",
-          ) do |http|
+          Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https") do |http|
             http.request(request)
           end
 
@@ -204,15 +190,12 @@ module ::DiscourseGhlIntegration
             "[#{PLUGIN_NAME}] GoHighLevel OAuth request failed with status #{response.code}",
           )
 
-          raise Error,
-                "GoHighLevel OAuth request failed with status #{response.code}"
+          raise Error, "GoHighLevel OAuth request failed with status #{response.code}"
         end
 
         response
       rescue SocketError, Timeout::Error, Errno::ECONNREFUSED => e
-        Rails.logger.warn(
-          "[#{PLUGIN_NAME}] GoHighLevel OAuth network error: #{e.class}",
-        )
+        Rails.logger.warn("[#{PLUGIN_NAME}] GoHighLevel OAuth network error: #{e.class}")
 
         raise Error, "Unable to connect to GoHighLevel"
       end

@@ -17,11 +17,7 @@ module ::DiscourseGhlIntegration
 
       redirect_uri = "#{request.base_url}/crm/oauth/callback"
 
-      token =
-        Oauth.exchange_code(
-          code: code,
-          redirect_uri: redirect_uri,
-        )
+      token = Oauth.exchange_code(code: code, redirect_uri: redirect_uri)
 
       case token["userType"]
       when "Location"
@@ -38,17 +34,9 @@ module ::DiscourseGhlIntegration
 
       redirect_to "https://app.gohighlevel.com/", allow_other_host: true
     rescue Oauth::Error => e
-      Rails.logger.warn(
-        "[#{PLUGIN_NAME}] OAuth callback failed: #{e.message}",
-      )
+      Rails.logger.warn("[#{PLUGIN_NAME}] OAuth callback failed: #{e.message}")
 
-      render(
-        json: {
-          success: false,
-          error: e.message,
-        },
-        status: :unprocessable_entity,
-      )
+      render(json: { success: false, error: e.message }, status: :unprocessable_entity)
     end
   end
 end
