@@ -17,18 +17,13 @@ module ::DiscourseGhlIntegration
 
         tag = SiteSetting.ghl_community_member_tag
 
-        if tag.blank?
-          raise Error, "GoHighLevel community member tag is not configured"
-        end
+        raise Error, "GoHighLevel community member tag is not configured" if tag.blank?
 
         contact = find_or_create_contact(user)
 
         save_contact_id(user, contact.fetch("id"))
 
-        Client.add_tags(
-          contact_id: contact.fetch("id"),
-          tags: [tag],
-        )
+        Client.add_tags(contact_id: contact.fetch("id"), tags: [tag])
 
         contact
       rescue Client::Error => e
@@ -56,11 +51,7 @@ module ::DiscourseGhlIntegration
 
         first_name, last_name = split_name(user.name)
 
-        Client.create_contact(
-          email: user.email,
-          first_name: first_name,
-          last_name: last_name,
-        )
+        Client.create_contact(email: user.email, first_name: first_name, last_name: last_name)
       end
 
       def save_contact_id(user, contact_id)
@@ -76,7 +67,7 @@ module ::DiscourseGhlIntegration
       end
 
       def split_name(name)
-        return [nil, nil] if name.blank?
+        return nil, nil if name.blank?
 
         parts = name.strip.split(/\s+/, 2)
 

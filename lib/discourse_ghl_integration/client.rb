@@ -26,8 +26,7 @@ module ::DiscourseGhlIntegration
 
         message = body["message"] || body["error"]
 
-        message.to_s.downcase.include?("contact") &&
-          message.to_s.downcase.include?("not found")
+        message.to_s.downcase.include?("contact") && message.to_s.downcase.include?("not found")
       rescue JSON::ParserError
         false
       end
@@ -39,15 +38,7 @@ module ::DiscourseGhlIntegration
 
         raise Error, "GoHighLevel Location ID is missing" if location_id.blank?
 
-        response =
-          get(
-            "/contacts/lookup",
-            {
-              locationId: location_id,
-              email: email,
-              limit: 20,
-            },
-          )
+        response = get("/contacts/lookup", { locationId: location_id, email: email, limit: 20 })
 
         response.fetch("contacts", [])
       end
@@ -57,11 +48,7 @@ module ::DiscourseGhlIntegration
 
         raise Error, "GoHighLevel Location ID is missing" if location_id.blank?
 
-        body = {
-          email: email,
-          locationId: location_id,
-          source: "Discourse",
-        }
+        body = { email: email, locationId: location_id, source: "Discourse" }
 
         body[:firstName] = first_name if first_name.present?
         body[:lastName] = last_name if last_name.present?
@@ -99,13 +86,7 @@ module ::DiscourseGhlIntegration
         raise Error, "GoHighLevel contact ID is missing" if contact_id.blank?
         raise Error, "GoHighLevel tags are missing" if tags.blank?
 
-        response =
-          post(
-            "/contacts/#{contact_id}/tags",
-            {
-              tags: Array(tags),
-            },
-          )
+        response = post("/contacts/#{contact_id}/tags", { tags: Array(tags) })
 
         response.fetch("tags", [])
       end
@@ -114,13 +95,7 @@ module ::DiscourseGhlIntegration
         raise Error, "GoHighLevel contact ID is missing" if contact_id.blank?
         raise Error, "GoHighLevel tags are missing" if tags.blank?
 
-        response =
-          delete(
-            "/contacts/#{contact_id}/tags",
-            {
-              tags: Array(tags),
-            },
-          )
+        response = delete("/contacts/#{contact_id}/tags", { tags: Array(tags) })
 
         response.fetch("tags", [])
       end
@@ -170,11 +145,7 @@ module ::DiscourseGhlIntegration
 
       def perform_request(uri, request)
         response =
-          Net::HTTP.start(
-            uri.hostname,
-            uri.port,
-            use_ssl: uri.scheme == "https",
-          ) do |http|
+          Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == "https") do |http|
             http.request(request)
           end
 
@@ -185,19 +156,17 @@ module ::DiscourseGhlIntegration
           )
 
           raise Error.new(
-            "GoHighLevel API request failed with status #{response.code}",
-            status: response.code.to_i,
-            response_body: response.body,
-          )
+                  "GoHighLevel API request failed with status #{response.code}",
+                  status: response.code.to_i,
+                  response_body: response.body,
+                )
         end
 
         JSON.parse(response.body)
       rescue JSON::ParserError
         raise Error, "GoHighLevel returned an invalid API response"
       rescue SocketError, Timeout::Error, Errno::ECONNREFUSED => e
-        Rails.logger.warn(
-          "[#{PLUGIN_NAME}] GoHighLevel API network error: #{e.class}",
-        )
+        Rails.logger.warn("[#{PLUGIN_NAME}] GoHighLevel API network error: #{e.class}")
 
         raise Error, "Unable to connect to GoHighLevel"
       end
