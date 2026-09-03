@@ -11,6 +11,10 @@ module ::DiscourseGhlIntegration
         PluginStore.get(PLUGIN_NAME, CREDENTIALS_KEY)
       end
 
+      def location_id
+        credentials&.dig("location_id")
+      end
+
       def save(credentials)
         PluginStore.set(PLUGIN_NAME, CREDENTIALS_KEY, credentials)
       end

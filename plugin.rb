@@ -15,5 +15,16 @@ end
 require_relative "lib/discourse_ghl_integration/engine"
 
 after_initialize do
-  # Code which should run after Rails has finished booting
+  on(:user_first_logged_in) do |user|
+    next unless SiteSetting.discourse_ghl_integration_enabled
+
+    begin
+      DiscourseGhlIntegration::ContactSync.sync_user(user)
+    rescue DiscourseGhlIntegration::ContactSync::Error => e
+      Rails.logger.warn(
+        "[#{DiscourseGhlIntegration::PLUGIN_NAME}] " \
+          "Failed to sync activated user #{user.id} to GoHighLevel: #{e.message}",
+      )
+    end
+  end
 end
