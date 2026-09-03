@@ -1,4 +1,18 @@
-discourse_ghl_integration:
+plugins:
   discourse_ghl_integration_enabled:
     default: false
-    client: true
+    client: false
+
+  ghl_client_id:
+    default: ""
+    client: false
+
+  ghl_client_secret:
+    default: ""
+    client: false
+    secret: true
+
+  ghl_tag_group_mappings:
+    default: ""
+    client: false
+    textarea: true

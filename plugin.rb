@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
 # name: discourse-ghl-integration
-# about: TODO
-# meta_topic_id: TODO
+# about: Integrates GoHighLevel contacts and tags with Discourse users and groups
 # version: 0.0.1
-# authors: Discourse
-# url: TODO
-# required_version: 2.7.0
+# authors: Jahan Gagan
+# url: https://github.com/jahan-ggn/discourse-ghl-integration
 
 enabled_site_setting :discourse_ghl_integration_enabled
 
