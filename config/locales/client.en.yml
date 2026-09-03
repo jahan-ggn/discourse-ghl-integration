@@ -3,7 +3,7 @@ en:
     admin:
       site_settings:
         categories:
-          TODO_plugin_name: "Plugin Name"
+          discourse_ghl_integration: "Discourse Ghl Integration"
   js:
-    discourse_plugin_name:
+    discourse_ghl_integration:
       placeholder: placeholder

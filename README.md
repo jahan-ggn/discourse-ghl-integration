@@ -1,4 +1,4 @@
-# **Plugin Name** Plugin
+# **Discourse Ghl Integration** Plugin
 
 **Plugin Summary**
 
