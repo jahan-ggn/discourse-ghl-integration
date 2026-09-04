@@ -15,7 +15,7 @@ plugins:
   ghl_tag_group_mappings:
     default: ""
     client: false
-    textarea: true
+    type: list
   
   ghl_community_member_tag:
     default: "community_member"

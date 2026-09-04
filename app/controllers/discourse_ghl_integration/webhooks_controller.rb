@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 module ::DiscourseGhlIntegration
   class WebhooksController < ::ApplicationController
     requires_plugin PLUGIN_NAME
@@ -10,10 +9,15 @@ module ::DiscourseGhlIntegration
     def create
       payload = request.request_parameters
 
-      handle_install(payload) if payload["type"] == "INSTALL"
+      case payload["type"]
+      when "INSTALL"
+        handle_install(payload)
+      when "ContactTagUpdate"
+        handle_contact_tag_update(payload)
+      end
 
       head :ok
-    rescue Oauth::Error => e
+    rescue Oauth::Error, ContactTagSync::Error => e
       Rails.logger.warn("[#{PLUGIN_NAME}] GoHighLevel webhook failed: #{e.message}")
 
       head :unprocessable_entity
@@ -30,6 +34,18 @@ module ::DiscourseGhlIntegration
       OauthStore.save_pending_install({ "company_id" => company_id, "location_id" => location_id })
 
       Oauth.complete_pending_connection!
+    end
+
+    def handle_contact_tag_update(payload)
+      location_id = payload["locationId"]
+
+      raise ContactTagSync::Error, "GoHighLevel Location ID is missing" if location_id.blank?
+
+      unless location_id == OauthStore.location_id
+        raise ContactTagSync::Error, "GoHighLevel Location ID does not match installed location"
+      end
+
+      ContactTagSync.sync(payload)
     end
   end
 end
