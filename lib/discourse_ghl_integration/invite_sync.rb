@@ -14,24 +14,13 @@ module ::DiscourseGhlIntegration
 
         invite =
           Invite
-            .where(
-              email: email,
-              invited_by_id: invited_by.id,
-            )
+            .where(email: email, invited_by_id: invited_by.id)
             .order(created_at: :desc)
             .detect(&:redeemable?)
 
-        invite ||=
-          Invite.generate(
-            invited_by,
-            email: email,
-            group_ids: desired_group_ids,
-          )
+        invite ||= Invite.generate(invited_by, email: email, group_ids: desired_group_ids)
 
-        sync_groups(
-          invite: invite,
-          desired_group_ids: desired_group_ids,
-        )
+        sync_groups(invite: invite, desired_group_ids: desired_group_ids)
 
         invite
       rescue Invite::UserExists
@@ -62,31 +51,23 @@ module ::DiscourseGhlIntegration
       end
 
       def configured_group_ids
-        TagGroupMapping.all.values.filter_map do |group_name|
-          Group.find_by(name: group_name)&.id
-        end
+        TagGroupMapping.all.values.filter_map { |group_name| Group.find_by(name: group_name)&.id }
       end
 
       def sync_groups(invite:, desired_group_ids:)
         managed_group_ids = configured_group_ids
 
-        current_group_ids =
-          invite.group_ids & managed_group_ids
+        current_group_ids = invite.group_ids & managed_group_ids
 
-        group_ids_to_add =
-          desired_group_ids - current_group_ids
+        group_ids_to_add = desired_group_ids - current_group_ids
 
-        group_ids_to_remove =
-          current_group_ids - desired_group_ids
+        group_ids_to_remove = current_group_ids - desired_group_ids
 
         group_ids_to_add.each do |group_id|
           invite.invited_groups.find_or_create_by!(group_id: group_id)
         end
 
-        invite
-          .invited_groups
-          .where(group_id: group_ids_to_remove)
-          .destroy_all
+        invite.invited_groups.where(group_id: group_ids_to_remove).destroy_all
       end
     end
   end

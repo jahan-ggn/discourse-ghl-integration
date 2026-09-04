@@ -25,10 +25,7 @@ module ::DiscourseGhlIntegration
 
       def find_by_contact_id(contact_id)
         UserCustomField
-          .where(
-            name: GHL_CONTACT_ID_FIELD,
-            value: contact_id,
-          )
+          .where(name: GHL_CONTACT_ID_FIELD, value: contact_id)
           .includes(:user)
           .first
           &.user

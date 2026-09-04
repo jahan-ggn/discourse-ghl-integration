@@ -15,25 +15,15 @@ module ::DiscourseGhlIntegration
 
         raise Error, "GoHighLevel contact ID is missing" if contact_id.blank?
 
-        user =
-          UserLinker.find_or_link(
-            contact_id: contact_id,
-            email: email,
-          )
+        user = UserLinker.find_or_link(contact_id: contact_id, email: email)
 
         if user.blank?
-          InviteSync.sync(
-            email: email,
-            tags: tags,
-          )
+          InviteSync.sync(email: email, tags: tags)
 
           return nil
         end
 
-        GroupSync.sync(
-          user: user,
-          tags: tags,
-        )
+        GroupSync.sync(user: user, tags: tags)
 
         user
       end
