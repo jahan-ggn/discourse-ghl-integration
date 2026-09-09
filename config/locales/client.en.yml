@@ -3,7 +3,8 @@ en:
     admin:
       site_settings:
         categories:
-          discourse_ghl_integration: "Discourse Ghl Integration"
+          discourse_ghl_integration: "Discourse GHL Integration"
   js:
     discourse_ghl_integration:
-      placeholder: placeholder
+      title: "Discourse GHL Integration"
+      admin_navigation: "Discourse GHL Integration"
