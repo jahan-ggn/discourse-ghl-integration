@@ -15,6 +15,7 @@ end
 require_relative "lib/discourse_ghl_integration/engine"
 
 after_initialize do
+  require_relative "app/jobs/regular/process_ghl_webhook"
   on(:user_first_logged_in) do |user|
     next unless SiteSetting.discourse_ghl_integration_enabled
 

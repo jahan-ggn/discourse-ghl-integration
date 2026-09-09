@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ::DiscourseGhlIntegration
+module DiscourseGhlIntegration
   class OauthStore
     CREDENTIALS_KEY = "oauth_credentials"
     PENDING_COMPANY_KEY = "pending_company_oauth"

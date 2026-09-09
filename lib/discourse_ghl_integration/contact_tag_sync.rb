@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ::DiscourseGhlIntegration
+module DiscourseGhlIntegration
   class ContactTagSync
     class Error < StandardError
     end
@@ -26,6 +26,8 @@ module ::DiscourseGhlIntegration
         GroupSync.sync(user: user, tags: tags)
 
         user
+      rescue InviteSync::Error => e
+        raise Error, e.message
       end
     end
   end

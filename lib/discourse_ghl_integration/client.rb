@@ -4,7 +4,7 @@ require "net/http"
 require "json"
 require "uri"
 
-module ::DiscourseGhlIntegration
+module DiscourseGhlIntegration
   class Client
     BASE_URL = "https://services.leadconnectorhq.com"
     API_VERSION = "v3"

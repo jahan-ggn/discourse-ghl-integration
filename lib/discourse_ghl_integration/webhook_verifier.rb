@@ -3,7 +3,7 @@
 require "openssl"
 require "base64"
 
-module ::DiscourseGhlIntegration
+module DiscourseGhlIntegration
   class WebhookVerifier
     PUBLIC_KEY = <<~PEM
       -----BEGIN PUBLIC KEY-----
@@ -21,12 +21,7 @@ module ::DiscourseGhlIntegration
         signature_bytes = Base64.strict_decode64(signature)
         public_key = OpenSSL::PKey.read(PUBLIC_KEY)
 
-        valid =
-          public_key.verify(
-            nil,
-            signature_bytes,
-            payload,
-          )
+        valid = public_key.verify(nil, signature_bytes, payload)
 
         raise Error, "GoHighLevel webhook signature is invalid" unless valid
 

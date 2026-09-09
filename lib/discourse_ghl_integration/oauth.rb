@@ -4,7 +4,7 @@ require "net/http"
 require "json"
 require "uri"
 
-module ::DiscourseGhlIntegration
+module DiscourseGhlIntegration
   class Oauth
     TOKEN_URL = "https://services.leadconnectorhq.com/oauth/token"
     LOCATION_TOKEN_URL = "https://services.leadconnectorhq.com/oauth/location-token"

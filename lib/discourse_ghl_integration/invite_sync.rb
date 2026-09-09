@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ::DiscourseGhlIntegration
+module DiscourseGhlIntegration
   class InviteSync
     class Error < StandardError
     end
@@ -22,7 +22,7 @@ module ::DiscourseGhlIntegration
 
         sync_groups(invite: invite, desired_group_ids: desired_group_ids)
 
-        invite
+        invite.reload
       rescue Invite::UserExists
         nil
       rescue ActiveRecord::RecordInvalid, RateLimiter::LimitExceeded => e
@@ -34,24 +34,34 @@ module ::DiscourseGhlIntegration
       def mapped_group_ids(tags)
         tags = Array(tags)
 
-        TagGroupMapping.all.filter_map do |tag, group_name|
-          next if tags.exclude?(tag)
+        TagGroupMapping
+          .all
+          .flat_map do |tag, group_names|
+            next [] if tags.exclude?(tag)
 
-          group = Group.find_by(name: group_name)
+            group_names.filter_map do |group_name|
+              group = Group.find_by(name: group_name)
 
-          unless group
-            Rails.logger.warn(
-              "[#{PLUGIN_NAME}] Discourse group '#{group_name}' configured for GHL tag '#{tag}' does not exist",
-            )
-            next
+              unless group
+                Rails.logger.warn(
+                  "[#{PLUGIN_NAME}] Discourse group '#{group_name}' configured for GHL tag '#{tag}' does not exist",
+                )
+                next
+              end
+
+              group.id
+            end
           end
-
-          group.id
-        end
+          .uniq
       end
 
       def configured_group_ids
-        TagGroupMapping.all.values.filter_map { |group_name| Group.find_by(name: group_name)&.id }
+        TagGroupMapping
+          .all
+          .values
+          .flatten
+          .filter_map { |group_name| Group.find_by(name: group_name)&.id }
+          .uniq
       end
 
       def sync_groups(invite:, desired_group_ids:)

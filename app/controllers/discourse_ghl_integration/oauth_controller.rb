@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ::DiscourseGhlIntegration
+module DiscourseGhlIntegration
   class OauthController < ::ApplicationController
     requires_plugin PLUGIN_NAME
 

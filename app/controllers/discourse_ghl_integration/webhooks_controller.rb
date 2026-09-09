@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ::DiscourseGhlIntegration
+module DiscourseGhlIntegration
   class WebhooksController < ::ApplicationController
     requires_plugin PLUGIN_NAME
 
@@ -51,15 +51,7 @@ module ::DiscourseGhlIntegration
     end
 
     def handle_contact_tag_update(payload)
-      location_id = payload["locationId"]
-
-      raise ContactTagSync::Error, "GoHighLevel Location ID is missing" if location_id.blank?
-
-      unless location_id == OauthStore.location_id
-        raise ContactTagSync::Error, "GoHighLevel Location ID does not match installed location"
-      end
-
-      ContactTagSync.sync(payload)
+      Jobs.enqueue(:process_ghl_webhook, payload: payload)
     end
   end
 end

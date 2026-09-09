@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ::DiscourseGhlIntegration
+module DiscourseGhlIntegration
   class ContactSync
     GHL_CONTACT_ID_FIELD = "ghl_contact_id"
 

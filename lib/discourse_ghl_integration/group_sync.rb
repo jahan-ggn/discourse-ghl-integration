@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ::DiscourseGhlIntegration
+module DiscourseGhlIntegration
   class GroupSync
     class Error < StandardError
     end
@@ -12,17 +12,22 @@ module ::DiscourseGhlIntegration
         tags = Array(tags)
         mappings = TagGroupMapping.all
 
-        mappings.each do |tag, group_name|
+        managed_group_names = mappings.values.flatten.uniq
+
+        desired_group_names =
+          mappings.flat_map { |tag, group_names| tags.include?(tag) ? group_names : [] }.uniq
+
+        managed_group_names.each do |group_name|
           group = Group.find_by(name: group_name)
 
           unless group
             Rails.logger.warn(
-              "[#{PLUGIN_NAME}] Discourse group '#{group_name}' configured for GHL tag '#{tag}' does not exist",
+              "[#{PLUGIN_NAME}] Discourse group '#{group_name}' configured for GHL tags does not exist",
             )
             next
           end
 
-          if tags.include?(tag)
+          if desired_group_names.include?(group_name)
             add_to_group(user, group)
           else
             remove_from_group(user, group)
