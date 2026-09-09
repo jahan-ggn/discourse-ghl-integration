@@ -24,7 +24,7 @@ after_initialize do
     rescue DiscourseGhlIntegration::ContactSync::Error => e
       Rails.logger.warn(
         "[#{DiscourseGhlIntegration::PLUGIN_NAME}] " \
-          "Failed to sync activated user #{user.id} to GoHighLevel: #{e.message}",
+          "Failed to sync user #{user.id} to GoHighLevel: #{e.message}",
       )
     end
   end

@@ -32,9 +32,20 @@ module Jobs
         return unless valid_location?(payload)
 
         DiscourseGhlIntegration::ContactTagSync.sync(payload)
+      else
+        Rails.logger.info(
+          "[#{DiscourseGhlIntegration::PLUGIN_NAME}] " \
+            "Ignoring unsupported GHL webhook type #{payload["type"]}",
+        )
+
+        return
       end
 
       DiscourseGhlIntegration::WebhookStore.mark_processed(webhook_id)
+      Rails.logger.info(
+        "[#{DiscourseGhlIntegration::PLUGIN_NAME}] " \
+          "Processed GHL webhook #{webhook_id} (#{payload["type"]})",
+      )
     end
 
     private

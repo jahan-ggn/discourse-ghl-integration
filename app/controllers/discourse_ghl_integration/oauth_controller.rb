@@ -36,7 +36,13 @@ module DiscourseGhlIntegration
     rescue Oauth::Error => e
       Rails.logger.warn("[#{PLUGIN_NAME}] OAuth callback failed: #{e.message}")
 
-      render(json: { success: false, error: e.message }, status: :unprocessable_entity)
+      render(
+        json: {
+          success: false,
+          error: "GoHighLevel OAuth connection failed",
+        },
+        status: :unprocessable_entity,
+      )
     end
   end
 end
