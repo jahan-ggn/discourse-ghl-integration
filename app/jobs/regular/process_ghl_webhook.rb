@@ -28,6 +28,10 @@ module Jobs
       end
 
       case payload["type"]
+      when "ContactDelete"
+        return unless valid_location?(payload)
+
+        DiscourseGhlIntegration::ContactDeleteSync.sync(payload)
       when "ContactTagUpdate"
         return unless valid_location?(payload)
 

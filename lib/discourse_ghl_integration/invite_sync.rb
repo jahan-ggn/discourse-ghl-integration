@@ -6,8 +6,9 @@ module DiscourseGhlIntegration
     end
 
     class << self
-      def sync(email:, tags:)
+      def sync(email:, tags:, contact_id:)
         raise Error, "GoHighLevel contact email is missing" if email.blank?
+        raise Error, "GoHighLevel contact ID is missing" if contact_id.blank?
 
         desired_group_ids = mapped_group_ids(tags)
         invited_by = User.find(Discourse::SYSTEM_USER_ID)
@@ -23,6 +24,9 @@ module DiscourseGhlIntegration
         sync_groups(invite: invite, desired_group_ids: desired_group_ids)
 
         invite.reload
+        InviteContactStore.save(invite_id: invite.id, contact_id: contact_id)
+
+        invite
       rescue Invite::UserExists
         nil
       rescue ActiveRecord::RecordInvalid, RateLimiter::LimitExceeded => e

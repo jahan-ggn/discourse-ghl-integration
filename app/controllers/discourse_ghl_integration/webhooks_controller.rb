@@ -18,8 +18,8 @@ module DiscourseGhlIntegration
       case payload["type"]
       when "INSTALL"
         handle_install(payload)
-      when "ContactTagUpdate"
-        handle_contact_tag_update(payload)
+      when "ContactTagUpdate", "ContactDelete"
+        Jobs.enqueue(:process_ghl_webhook, payload: payload)
       end
 
       head :ok
@@ -48,10 +48,6 @@ module DiscourseGhlIntegration
       OauthStore.save_pending_install({ "company_id" => company_id, "location_id" => location_id })
 
       Oauth.complete_pending_connection!
-    end
-
-    def handle_contact_tag_update(payload)
-      Jobs.enqueue(:process_ghl_webhook, payload: payload)
     end
   end
 end

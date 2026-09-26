@@ -28,7 +28,7 @@ module DiscourseGhlIntegration
           user = UserLinker.find_or_link(contact_id: contact_id, email: email)
 
           if user.blank?
-            InviteSync.sync(email: email, tags: tags)
+            InviteSync.sync(email: email, tags: tags, contact_id: contact_id)
             nil
           else
             GroupSync.sync(user: user, tags: tags)
