@@ -201,7 +201,16 @@ module DiscourseGhlIntegration
       end
 
       def parse_token_response(response)
-        JSON.parse(response.body)
+        token = JSON.parse(response.body)
+
+        raise Error, "GoHighLevel returned an invalid OAuth response" unless token.is_a?(Hash)
+
+        if token["error"].present?
+          Rails.logger.warn("[#{PLUGIN_NAME}] GoHighLevel OAuth returned error: #{token["error"]}")
+          raise Error, "GoHighLevel OAuth token request was rejected"
+        end
+
+        token
       rescue JSON::ParserError
         raise Error, "GoHighLevel returned an invalid OAuth response"
       end

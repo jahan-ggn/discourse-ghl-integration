@@ -162,7 +162,24 @@ module DiscourseGhlIntegration
                 )
         end
 
-        JSON.parse(response.body)
+        parsed = JSON.parse(response.body)
+
+        raise Error, "GoHighLevel returned an invalid API response" unless parsed.is_a?(Hash)
+
+        if parsed["error"].present?
+          Rails.logger.error(
+            "[#{PLUGIN_NAME}] GoHighLevel API returned an error for " \
+              "#{request.method} #{uri.path}",
+          )
+
+          raise Error.new(
+                  "GoHighLevel API returned an error",
+                  status: response.code.to_i,
+                  response_body: response.body,
+                )
+        end
+
+        parsed
       rescue JSON::ParserError
         raise Error, "GoHighLevel returned an invalid API response"
       rescue SocketError, Timeout::Error, Errno::ECONNREFUSED => e
