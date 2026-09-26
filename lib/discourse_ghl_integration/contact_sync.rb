@@ -20,19 +20,27 @@ module DiscourseGhlIntegration
         raise Error, "GoHighLevel community member tag is not configured" if tag.blank?
 
         contact = find_or_create_contact(user)
+        contact_id = contact.fetch("id")
+        save_contact_id(user, contact_id)
+        location_id = OauthStore.location_id
 
-        save_contact_id(user, contact.fetch("id"))
+        raise Error, "GoHighLevel Location ID is missing" if location_id.blank?
 
-        Client.add_tags(contact_id: contact.fetch("id"), tags: [tag])
+        DistributedMutex.synchronize(
+          "ghl_contact_sync_#{location_id}_#{contact_id}",
+          validity: 2.minutes,
+        ) do
+          Client.add_tags(contact_id: contact_id, tags: [tag])
 
-        current_contact = Client.get_contact(contact.fetch("id"))
-        tags = current_contact["tags"]
+          current_contact = Client.get_contact(contact_id)
+          tags = current_contact["tags"]
 
-        raise Error, "GoHighLevel contact tags are missing" unless tags.is_a?(Array)
+          raise Error, "GoHighLevel contact tags are missing" unless tags.is_a?(Array)
 
-        GroupSync.sync(user: user, tags: tags)
+          GroupSync.sync(user: user, tags: tags)
 
-        current_contact
+          current_contact
+        end
       rescue Client::Error => e
         raise Error, e.message
       end

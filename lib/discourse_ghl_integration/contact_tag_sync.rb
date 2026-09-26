@@ -10,23 +10,32 @@ module DiscourseGhlIntegration
         raise Error, "Webhook payload is missing" if payload.blank?
 
         contact_id = payload["id"]
-        email = payload["email"]
-        tags = payload["tags"]
+        location_id = payload["locationId"]
 
         raise Error, "GoHighLevel contact ID is missing" if contact_id.blank?
+        raise Error, "GoHighLevel Location ID is missing" if location_id.blank?
 
-        user = UserLinker.find_or_link(contact_id: contact_id, email: email)
+        DistributedMutex.synchronize(
+          "ghl_contact_sync_#{location_id}_#{contact_id}",
+          validity: 2.minutes,
+        ) do
+          contact = Client.get_contact(contact_id)
+          tags = contact["tags"]
 
-        if user.blank?
-          InviteSync.sync(email: email, tags: tags)
+          raise Error, "GoHighLevel contact tags are missing" unless tags.is_a?(Array)
 
-          return nil
+          email = contact["email"].presence || payload["email"]
+          user = UserLinker.find_or_link(contact_id: contact_id, email: email)
+
+          if user.blank?
+            InviteSync.sync(email: email, tags: tags)
+            nil
+          else
+            GroupSync.sync(user: user, tags: tags)
+            user
+          end
         end
-
-        GroupSync.sync(user: user, tags: tags)
-
-        user
-      rescue InviteSync::Error => e
+      rescue Client::Error, InviteSync::Error => e
         raise Error, e.message
       end
     end
