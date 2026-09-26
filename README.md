@@ -85,6 +85,26 @@ vip_member:vip
 
 The configured Discourse groups must already exist.
 
+### Changing a tag-to-group mapping
+
+Changing `ghl_tag_group_mappings` directly does not update existing access. To reconcile linked users and plugin-associated outstanding invitations, create the new Discourse group first.
+
+On the Discourse server, enter the app container:
+
+```bash
+cd /var/discourse
+./launcher enter app
+```
+
+Then run the task inside the container:
+
+```bash
+cd /var/www/discourse
+bundle exec rake ghl:reconcile_mappings
+```
+
+Choose the mapping number and enter the replacement as ghl_tag:discourse_group. The task shows everyone who would gain or lose group access. Review the list, then type APPLY to proceed. Any other response cancels without making changes.
+
 ## GoHighLevel Setup
 
 Configure the Marketplace app with:
