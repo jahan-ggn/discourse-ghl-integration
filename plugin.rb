@@ -16,6 +16,8 @@ require_relative "lib/discourse_ghl_integration/engine"
 
 after_initialize do
   require_relative "app/jobs/regular/process_ghl_webhook"
+  require_relative "app/jobs/regular/sync_ghl_user"
+
   on(:user_first_logged_in) do |user|
     next unless SiteSetting.discourse_ghl_integration_enabled
 
@@ -24,8 +26,9 @@ after_initialize do
     rescue DiscourseGhlIntegration::ContactSync::Error => e
       Rails.logger.warn(
         "[#{DiscourseGhlIntegration::PLUGIN_NAME}] " \
-          "Failed to sync user #{user.id} to GoHighLevel: #{e.message}",
+          "Failed to sync user #{user.id} to GoHighLevel: #{e.message}; queuing retry",
       )
+      Jobs.enqueue(:sync_ghl_user, user_id: user.id)
     end
   end
 end
