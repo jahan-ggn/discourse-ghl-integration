@@ -25,7 +25,14 @@ module DiscourseGhlIntegration
 
         Client.add_tags(contact_id: contact.fetch("id"), tags: [tag])
 
-        contact
+        current_contact = Client.get_contact(contact.fetch("id"))
+        tags = current_contact["tags"]
+
+        raise Error, "GoHighLevel contact tags are missing" unless tags.is_a?(Array)
+
+        GroupSync.sync(user: user, tags: tags)
+
+        current_contact
       rescue Client::Error => e
         raise Error, e.message
       end
