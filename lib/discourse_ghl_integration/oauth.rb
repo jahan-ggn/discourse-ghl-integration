@@ -54,6 +54,15 @@ module DiscourseGhlIntegration
           raise Error, "Cannot store an invalid GoHighLevel Location token"
         end
 
+        connected_location_id = OauthStore.location_id
+        incoming_location_id = token["locationId"]
+
+        if connected_location_id.present? && connected_location_id != incoming_location_id
+          raise Error,
+                "GoHighLevel location #{incoming_location_id} does not match " \
+                  "the connected location #{connected_location_id}"
+        end
+
         OauthStore.save(
           {
             "access_token" => token.fetch("access_token"),
