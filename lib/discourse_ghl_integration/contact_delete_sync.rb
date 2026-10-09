@@ -37,7 +37,7 @@ module DiscourseGhlIntegration
               end
 
             Invite
-              .where(email: email, invited_by_id: Discourse::SYSTEM_USER_ID)
+              .where(email: email)
               .find_each do |invite|
                 next unless invite.redeemable?
                 next unless InviteContactStore.contact_id(invite.id) == contact_id

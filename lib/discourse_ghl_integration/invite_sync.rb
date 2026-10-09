@@ -11,13 +11,21 @@ module DiscourseGhlIntegration
         raise Error, "GoHighLevel contact ID is missing" if contact_id.blank?
 
         desired_group_ids = mapped_group_ids(tags)
-        invited_by = User.find(Discourse::SYSTEM_USER_ID)
+        invited_by =
+          if SiteSetting.ghl_inviter_username.present?
+            User.find_by_username(SiteSetting.ghl_inviter_username)
+          else
+            User.find(Discourse::SYSTEM_USER_ID)
+          end
+        raise Error, "Configured GHL inviter no longer exists" unless invited_by
 
         invite =
           Invite
-            .where(email: email, invited_by_id: invited_by.id)
+            .where(email: email)
             .order(created_at: :desc)
-            .detect(&:redeemable?)
+            .detect do |candidate|
+              candidate.redeemable? && InviteContactStore.contact_id(candidate.id) == contact_id
+            end
 
         invite ||= Invite.generate(invited_by, email: email, group_ids: desired_group_ids)
 

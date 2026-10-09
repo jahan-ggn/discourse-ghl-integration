@@ -97,25 +97,23 @@ module DiscourseGhlIntegration
           changes << [:user, user.id, desired - current, current - desired]
         end
 
-      Invite
-        .where(invited_by_id: Discourse::SYSTEM_USER_ID)
-        .find_each do |invite|
-          next unless invite.redeemable?
+      Invite.find_each do |invite|
+        next unless invite.redeemable?
 
-          contact_id = InviteContactStore.contact_id(invite.id)
-          next if contact_id.blank?
+        contact_id = InviteContactStore.contact_id(invite.id)
+        next if contact_id.blank?
 
-          contact = contact_for.call(contact_id)
+        contact = contact_for.call(contact_id)
 
-          unless contact["deleted"] || contact["email"].to_s.casecmp?(invite.email.to_s)
-            raise Error, "Invite #{invite.id} email does not match its linked GHL contact"
-          end
-
-          current = invite.group_ids & managed_ids
-          desired = desired_ids_for.call(contact.fetch("tags"))
-
-          changes << [:invite, invite.id, desired - current, current - desired]
+        unless contact["deleted"] || contact["email"].to_s.casecmp?(invite.email.to_s)
+          raise Error, "Invite #{invite.id} email does not match its linked GHL contact"
         end
+
+        current = invite.group_ids & managed_ids
+        desired = desired_ids_for.call(contact.fetch("tags"))
+
+        changes << [:invite, invite.id, desired - current, current - desired]
+      end
 
       changes.select! { |_, _, add, remove| add.present? || remove.present? }
 

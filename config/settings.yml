@@ -20,3 +20,8 @@ plugins:
   ghl_community_member_tag:
     default: "community_member"
     client: false
+
+  ghl_inviter_username:
+    default: ""
+    type: username
+    client: false
