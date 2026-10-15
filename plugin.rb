@@ -23,7 +23,7 @@ after_initialize do
 
     begin
       DiscourseGhlIntegration::ContactSync.sync_user(user)
-    rescue DiscourseGhlIntegration::ContactSync::Error => e
+    rescue DiscourseGhlIntegration::ContactSync::Error, DiscourseGhlIntegration::Oauth::Error => e
       Rails.logger.warn(
         "[#{DiscourseGhlIntegration::PLUGIN_NAME}] " \
           "Failed to sync user #{user.id} to GoHighLevel: #{e.message}; queuing retry",
